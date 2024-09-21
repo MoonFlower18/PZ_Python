@@ -16,26 +16,27 @@ from tkinter import messagebox
 def z1():
     def decor(func):
         def modif():
-            print("Текущая дата и время: ", datetime.datetime.now(), "\n===")
+            print("Текущая дата и время: ", datetime.datetime.now(), "\n============================")
             func()
-            print("===\nДата и время после выполнения функции: ", datetime.datetime.now())
+            print("============================\nДата и время после выполнения функции: ", datetime.datetime.now())
 
         return modif
 
     @decor
     def print_t():
-        b = int(input("Введите число до 10 млн до 15 млн: "))
+        b = int(input("Введите число от 10 млн до 15 млн: "))
         a = 0
         while a != b:
             a = random.randint(1, 15000000)
         print("Найдено совпадение чисел!")
 
-    print_t();
+    print_t()
+
 
 def z2():
     tel = input("Введите номер телефона из 10 цифр в формате 00хххххххх: ")
 
-    while (len(tel) != 10) or (not re.match(r'^00[1-9][0-9]{8}$', tel)):
+    while (len(tel) != 10) or re.match(r'[1-9]{2}[0-9]{8}', tel):
         playsound(r'E:\ban.mp3')
         print("Ошибка! Некорректный ввод номера телефона!")
         tel = input("Введите корректный номер телефона из 10 цифр в формате 00хххххххх: ")
@@ -71,7 +72,7 @@ def z4():
     def check():
         word = entry.get()
 
-        if re.match(r'\w+@\w+\.\w+', word):  # проверка все буквы до @, потом все буквы до экранированной точки и все буквы после
+        if re.match(r'\w+@[a-zA-Z]+\.[a-zA-Z]+$', word):  # проверка все буквы до @, потом все буквы до экранированной точки и все буквы после
             messagebox.showinfo("Результат", "Это действительно почта!")
         else:
             messagebox.showerror("Ошибка", "Данный адрес не является почтой!")
@@ -93,7 +94,7 @@ def z5():
     def check():
         word = text_widget.get("1.0", tk.END)  # Получаем текст с первой строки до конца
 
-        find = re.findall(r'\w+@\w+\.\w+', word)  # проверка все буквы до @, потом все буквы до экранированной точки и все буквы после
+        find = re.findall(r'\w+@[a-zA-Z]+\.[a-zA-Z]+$', word)  # проверка все буквы до @, потом все буквы до экранированной точки и все буквы после
         label["text"] = '\n'.join(find)  # вывод на новые строки
 
     web = Tk()
@@ -131,8 +132,29 @@ def z5():
 
     web.mainloop()
 
+# ============================ вывод ответов ============================ #
 
 # from prettytable import PrettyTable
+
+choice = int(input("Введите номер задачи или '0' - чтобы завершить выполнение: "))
+while choice != 0:
+    if choice == 1:
+        z1()
+        print("Выполнение задачи №1 завершено!\n")
+    elif choice == 2:
+        z2()
+        print("Выполнение задачи №2 завершено!\n")
+    elif choice == 3:
+        z3()
+        print("Выполнение задачи №3 завершено!\n")
+    elif choice == 4:
+        z4()
+        print("Выполнение задачи №4 завершено!\n")
+    elif choice == 5:
+        z5()
+        print("Выполнение задачи №5 завершено!\n")
+
+    choice = int(input("Введите номер задачи или '0' - чтобы завершить выполнение: "))
 
 
 
