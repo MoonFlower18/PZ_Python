@@ -16,9 +16,9 @@ from tkinter import messagebox
 def z1():
     def decor(func):
         def modif():
-            print("Текущая дата и время: ", datetime.datetime.now(), "\n============================")
+            print("Текущая дата и время: ", datetime.datetime.now(), "\n=================================================")
             func()
-            print("============================\nДата и время после выполнения функции: ", datetime.datetime.now())
+            print("=================================================\nДата и время после выполнения функции: ", datetime.datetime.now())
 
         return modif
 
@@ -94,7 +94,7 @@ def z5():
     def check():
         word = text_widget.get("1.0", tk.END)  # Получаем текст с первой строки до конца
 
-        find = re.findall(r'\w+@[a-zA-Z]+\.[a-zA-Z]+$', word)  # проверка все буквы до @, потом все буквы до экранированной точки и все буквы после
+        find = re.findall(r'\w+@[a-zA-Z]+\.[a-zA-Z]+', word)  # проверка все буквы до @, потом все буквы до экранированной точки и все буквы после
         label["text"] = '\n'.join(find)  # вывод на новые строки
 
     web = Tk()
@@ -133,8 +133,6 @@ def z5():
     web.mainloop()
 
 # ============================ вывод ответов ============================ #
-
-# from prettytable import PrettyTable
 
 choice = int(input("Введите номер задачи или '0' - чтобы завершить выполнение: "))
 while choice != 0:
