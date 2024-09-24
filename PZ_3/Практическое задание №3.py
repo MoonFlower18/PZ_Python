@@ -7,18 +7,24 @@ root = Tk()
 root.title("Практические задачи")
 root.geometry("500x500")
 
-tasks = ["Задание №1", "Задание №2", "Задание №3", "Задание №4", "Задание №5"]
+tasks = [" - выберите задачу - ", "Задание №1", "Задание №2", "Задание №3", "Задание №4", "Задание №5"]
 tasks_var = StringVar(value=tasks[0])
+
 
 combobox = ttk.Combobox(textvariable=tasks_var, values=tasks, state="readonly")
 combobox.pack(anchor=NW, padx=6, pady=6)
 
+frame = ttk.Frame(borderwidth=1, relief=SOLID, padding=[5, 5])
+frame.pack(anchor=NW, padx=5, pady=1)
 
-def z1(label):
+label = ttk.Label(frame)
+label.pack()
+
+def z1():
     output = ""
 
     parts = psutil.disk_partitions()
-    output += "+-------------------------------------+"
+    output += "Информация о дисках системы: \n+-------------------------------------+"
 
     for part in parts:
         try:
@@ -28,24 +34,26 @@ def z1(label):
                        f"Тип файловой системы: {part.fstype}\n"
                        f"Размер файловой системы: {part_usage.total / (1024 ** 3):.0f} ГБ\n")
         except PermissionError:
-            output += "Не хватает прав для доступа к информации о диске.\n"
+            output += "\nНе хватает прав для доступа к информации о диске.\n"
 
         output += "+-------------------------------------+"
 
     label.config(text=output)
 
-frame1 = ttk.Frame(borderwidth=1, relief=SOLID, padding=[5, 5])
-frame1.pack(anchor=NW, padx=5, pady=1)
+def on_combobox_change(event):
+    selected_task = tasks_var.get()
+    label.config(text="")  # Очищаем текст перед новой операцией
+    if selected_task == "Задание №1":
+        z1()
 
-label1 = ttk.Label(frame1)
-label1.pack()
+    # Здесь вы можете добавить условия для других заданий
+    # elif selected_task == "Задание №2":
+    #     z2(label1)
+    # и так далее...
 
-z1(label1)
+combobox.bind("<<ComboboxSelected>>", on_combobox_change)
 
-
-
-label_all = ttk.Label(textvariable=tasks_var)
-label_all.pack(anchor=SW, padx=6, pady=6)
-
+# Инициализируем функцию для задания по умолчанию
+on_combobox_change(None)
 
 root.mainloop()
