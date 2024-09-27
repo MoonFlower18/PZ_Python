@@ -1,5 +1,7 @@
 from tkinter import *
 from tkinter import ttk
+from tkinter import messagebox, scrolledtext
+import tkinter as tk
 
 import psutil
 
@@ -39,20 +41,109 @@ def z1():
 
     label.config(text=output)
 
+def z2():
+    import os
+    os.chdir(r"E:\Программы\Проекты Питон\PZ_3")
+    # try:
+    #     os.path.exists(r"E:\Программы\Проекты Питон\PZ_3\first.txt")
+    # except False:
+    #     print("21212")
+
+# =============================== создание файла ================================ #
+
+    file_name_var = tk.StringVar()
+
+    create_frame = ttk.Frame()
+    create_frame.pack(pady=10)
+
+    def create_file():
+        file_name = file_name_var.get()+".txt"
+        if file_name:
+            with open(file_name, 'w') as f:
+                f.write("")
+            messagebox.showinfo("Успех", f"Файл '{file_name}' создан.")
+            #update_file_list() нужен дальше для динамики дирктория
+        else:
+            messagebox.showwarning("Ошибка", "Введите название файла.")
+
+    ttk.Label(create_frame, text="Название файла:").pack(side=tk.LEFT)
+    ttk.Entry(create_frame, textvariable=file_name_var).pack(side=tk.LEFT)
+    ttk.Button(create_frame, text="Создать файл", command=create_file).pack(side=tk.LEFT)
+
+# ============================ отображение содержимого ============================ #
+
+    content_frame = ttk.Frame()
+    content_frame.pack(pady=10)
+
+    def display_content():
+        file_name = file_name_var.get()+".txt"
+        if os.path.exists(file_name):
+            with open(file_name, 'r', encoding="utf-8") as f:
+                content = f.read()
+            content_area.config(state=tk.NORMAL)  # разрешаем редактирование временно
+            content_area.delete('1.0', tk.END)  # очищаем область
+            content_area.insert(tk.INSERT, content)  # вставляем текст
+            content_area.config(state=tk.DISABLED)  # запрещаем редактирование
+        else:
+            messagebox.showwarning("Ошибка", "Файл не существует.")
+
+    content_area = scrolledtext.ScrolledText(content_frame, width=30, height=10, state=tk.DISABLED)  # состояние изначально отключено
+    content_area.pack(side=tk.LEFT)
+
+    tk.Button(content_frame, text="Отобразить содержимое", command=display_content).pack(side=tk.LEFT)
+
+# ============================ добавление текста ============================ #
+
+    add_line_frame = tk.Frame()
+    add_line_frame.pack(pady=10)
+
+    line_var = tk.StringVar()
+
+    def add_line():
+        file_name = file_name_var.get()+".txt"
+        line_to_add = text_area.get("1.0", tk.END).strip()  # получаем весь текст из text_area
+        if os.path.exists(file_name) and line_to_add:
+            with open(file_name, 'a', encoding="utf-8") as f:
+                f.write("\n" + line_to_add)
+            messagebox.showinfo("Успех", "Строка добавлена в файл.")
+            text_area.delete("1.0", tk.END)  # Очищаем text_area
+        else:
+            messagebox.showwarning("Ошибка", "Файл не существует или строка пуста.")
+
+    tk.Label(add_line_frame, text="Строка для добавления:").pack()
+
+    # Создаем многострочное текстовое поле
+    text_area = scrolledtext.ScrolledText(add_line_frame, wrap=tk.WORD, width=30, height=5)
+    text_area.pack()
+
+    tk.Button(add_line_frame, text="Добавить в файл", command=add_line).pack(side=tk.LEFT)
+
+# ============================ удаление текста ============================ #
+
+    def delete_file():
+        file_name = file_name_var.get()+".txt"
+        if os.path.exists(file_name):
+            os.remove(file_name)
+            messagebox.showinfo("Успех", f"Файл '{file_name}' удален.")
+            #update_file_list()
+        else:
+            messagebox.showwarning("Ошибка", "Файл не существует.")
+
+    tk.Button(text="Удалить файл", command=delete_file).pack(pady=10)
+
 def on_combobox_change(event):
     selected_task = tasks_var.get()
     label.config(text="")
     if selected_task == " - выберите задачу - ":
         frame.pack_forget()
-        print("234")
     elif selected_task == "Задание №1":
         frame.pack(anchor=NW, padx=5, pady=1)
         z1()
-    # elif selected_task == "Задание №2":
-    #     z2()
+    elif selected_task == "Задание №2":
+        frame.pack_forget()
+        z2() #додумать дизайн
 
 combobox.bind("<<ComboboxSelected>>", on_combobox_change)
-
 on_combobox_change(None)
 
 root.mainloop()
