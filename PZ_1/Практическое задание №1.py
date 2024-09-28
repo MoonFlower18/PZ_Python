@@ -35,7 +35,7 @@ def z4():
 def z5():
     import os
     l5 = []
-    dir = 'C://directory//PZ_1' # тут нужен свой путь
+    dir = r'C:\<directory>\PZ_1' # тут нужен свой путь
     f = os.listdir(dir)
     for i5 in f:
         r5 = dir+"//"+i5
