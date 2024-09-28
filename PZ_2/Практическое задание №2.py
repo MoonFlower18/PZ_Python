@@ -36,8 +36,8 @@ def z1():
 def z2():
     tel = input("Введите номер телефона из 10 цифр в формате 00хххххххх: ")
 
-    while (len(tel) != 10) or re.match(r'[1-9]{2}[0-9]{8}', tel):
-        playsound(r'E:\ban.mp3')
+    while (len(tel) != 10) or not re.match(r'^00[0-9]{8}$', tel):
+        playsound(r"C:\Users\Yuliya\Desktop\ban.mp3")
         print("Ошибка! Некорректный ввод номера телефона!")
         tel = input("Введите корректный номер телефона из 10 цифр в формате 00хххххххх: ")
 
@@ -57,7 +57,7 @@ def z3():
 
     web = Tk()
     web.title("Проверка слова")
-    web.geometry("260x100+830+320")  # ширина х высота + отступ слева + отступ сверху
+    web.geometry("260x100+640+240")  # ширина х высота + отступ слева + отступ сверху
     web.configure(background="#F5F5F5", cursor="diamond_cross")
 
     entry = ttk.Entry(web)
@@ -79,7 +79,7 @@ def z4():
 
     web = Tk()
     web.title("Проверка почты")
-    web.geometry("260x100+830+320")  # ширина х высота + отступ слева + отступ сверху
+    web.geometry("260x100+640+240")  # ширина х высота + отступ слева + отступ сверху
     web.configure(background="#F5F5F5", cursor="diamond_cross")
 
     entry = ttk.Entry(web)
@@ -101,7 +101,8 @@ def z5():
     web.title("Проверка почты")
     x = web.winfo_screenwidth()  # размер по горизонтали из размера экрана
     y = web.winfo_screenheight()  # размер по вертикали из размера экрана
-    web.geometry('{}x{}+750+350'.format(int(x * 0.2), int(y * 0.3)))  # ширина х высота (умножить на процент) + отступ слева + отступ сверху
+    web.geometry('{}x{}+630+250'.format(int(x * 0.2), int(y * 0.4)))  # ширина х высота (умножить на процент) +
+    # отступ слева + отступ сверху
     web.configure(background="#F5F5F5", cursor="diamond_cross")
 
     text1 = ttk.Label(text="Введите исходный текст:", font="system")
