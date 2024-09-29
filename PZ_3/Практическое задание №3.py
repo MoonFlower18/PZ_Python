@@ -1,3 +1,4 @@
+import json
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox, scrolledtext
@@ -22,10 +23,12 @@ combobox.pack(anchor=NW, padx=6, pady=6)
 task_frame = Frame(web)
 task_frame.pack(anchor=NW, fill=BOTH)
 
+
 def clear_task_frame():
     # удаление всех деталей из фрейма с задачами
     for widget in task_frame.winfo_children():
         widget.destroy()
+
 
 def z1():
     clear_task_frame()
@@ -54,6 +57,7 @@ def z1():
         output += "+-------------------------------------+"
 
     label_z1.config(text=output)
+
 
 def z2():
     clear_task_frame()
@@ -179,6 +183,11 @@ def z2():
 
 
 
+
+
+
+
+
 def z3():
     clear_task_frame()
 
@@ -213,16 +222,111 @@ def z3():
     ttk.Entry(create_frame_z3, textvariable=file_name_var_z3).pack(side=tk.LEFT)
     ttk.Button(create_frame_z3, text="Создать файл", command=create_file_z3).pack(padx=5, side=tk.LEFT)
 
+    # ============================ отображение содержимого ============================ #
+
+    content_frame_z3 = ttk.Frame(task_frame)
+    content_frame_z3.pack(pady=10)
+
+    def display_content_z3():
+        file_name_z3 = file_name_var_z3.get() + ".json"
+
+        try:
+            if not os.path.exists(file_name_z3):
+                raise FileNotFoundError()
+
+            with open(file_name_z3, encoding='utf-8') as f:
+                content_z3 = json.load(f)
+            content_area_z3.config(state=tk.NORMAL)  # разрешение на временный редакт поля
+            content_area_z3.delete('1.0', tk.END)  # чистка старых данных
+            content_area_z3.insert(tk.INSERT, json.dumps(content_z3, ensure_ascii=False, indent=4)) # вставка нового текста
+            content_area_z3.config(state=tk.DISABLED)  # закрываем редакт поля
+        except FileNotFoundError:
+            messagebox.showerror("Ошибка", "Файла не существует.")
+        except json.JSONDecodeError:
+            messagebox.showerror("Ошибка", "Ошибка чтения файла JSON.")
+
+    tk.Label(content_frame_z3, text="Содержимое документа:").pack(pady=3)
+
+    content_area_z3 = scrolledtext.ScrolledText(content_frame_z3, width=30, height=10)
+    content_area_z3.pack()
+
+    tk.Button(content_frame_z3, text="Отобразить содержимое файла", command=display_content_z3).pack(pady=5)
+
+    # ============================ добавление текста ============================ #
+
+    add_lines_frame = tk.Frame(task_frame)
+    add_lines_frame.pack(pady=10)
+
+    def add_lines_z3():
+        file_name_z3 = file_name_var_z3.get() + ".json"
+
+        try:
+            if not os.path.exists(file_name_z3):
+                raise FileNotFoundError()
+
+            with open(file_name_z3, 'r', encoding='utf-8') as j:
+                if os.path.getsize(file_name_z3) == 0:  # проверка на пустой файл
+                    ex_data = []  # создадим новый список, чтобы не было ошибки json.JSONDecodeError
+                else:
+                    ex_data = json.load(j)
+
+                if isinstance(ex_data, dict):
+                    # Конвертация словаря в список
+                    ex_data = list(ex_data.values())
+                elif not isinstance(ex_data, list):
+                    raise ValueError("Данные в файле должны быть либо списком, либо объектом.")
+
+            if fam.get().isalpha() and name.get().isalpha() and (och.get().isalpha() or och.get() == ""):
+                fio = {
+                    "Фамилия": fam.get(),
+                    "Имя": name.get(),
+                    "Отчество": och.get()
+                }
+            else:
+                messagebox.showerror("Ошибка", "ФИО должно состоять из букв.")
 
 
+            ex_data.append(fio)
+
+            with open(file_name_z3, 'w', encoding='utf-8') as j:
+                json.dump(ex_data, j, ensure_ascii=False, indent=4)
+
+            messagebox.showinfo("Успех", "Данные успешно записаны в файл.")
+
+        except FileNotFoundError:
+            messagebox.showerror("Ошибка", "Файла не существует.")
+        except TypeError:
+            messagebox.showerror("Ошибка", "Некорректный ввод данных.")
+        except json.JSONDecodeError:
+            messagebox.showerror("Ошибка", "Ошибка чтения файла JSON. Неверный формат.")
+
+    tk.Label(add_lines_frame, text="Введите ФИО абитуриента: ").pack(pady=3)
+
+    fam_frame = tk.Frame(add_lines_frame)
+    fam_frame.pack(pady=1)
+
+    name_frame = tk.Frame(add_lines_frame)
+    name_frame.pack(pady=1)
+
+    och_frame = tk.Frame(add_lines_frame)
+    och_frame.pack(pady=1)
+
+    tk.Label(fam_frame, text="Фамилия: ").pack(pady=3, side=tk.LEFT)
+    fam = ttk.Entry(fam_frame)
+    fam.pack(anchor=NW, padx=6, pady=6, side=tk.LEFT)
+
+    tk.Label(name_frame, text="Имя: ").pack(pady=3, side=tk.LEFT)
+    name = ttk.Entry(name_frame)
+    name.pack(anchor=NW, padx=6, pady=6, side=tk.LEFT)
+
+    tk.Label(och_frame, text="Отчество: ").pack(pady=3, side=tk.LEFT)
+    och = ttk.Entry(och_frame)
+    och.pack(anchor=NW, padx=6, pady=6, side=tk.LEFT)
+
+    tk.Button(add_lines_frame, text="Добавить в файл", command=add_lines_z3).pack(pady=5)
 
 
-
-
-
-
-
-
+    # ============================ удаление текста ============================ #
 
     delete_frame_z3 = tk.Frame(task_frame)
     delete_frame_z3.pack(pady=10)
@@ -243,13 +347,6 @@ def z3():
     tk.Button(delete_frame_z3, text="Удалить файл", command=delete_file_z3).pack(pady=10, side=tk.LEFT)
 
 
-
-
-
-
-
-
-
 def on_combobox_change(event):
     selected_task = tasks_var.get()
     if selected_task == "Задание №1":
@@ -260,6 +357,7 @@ def on_combobox_change(event):
         z3()
     else:
         clear_task_frame()  # чистка фреймов, если выбрано " - выберите задачу - "
+
 
 combobox.bind("<<ComboboxSelected>>", on_combobox_change)
 on_combobox_change(None)
