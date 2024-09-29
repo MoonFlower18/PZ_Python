@@ -46,10 +46,6 @@ def z1():
 def z2():
     import os
     os.chdir(r"C:\Users\Юлия\Downloads\PZ_Python\PZ_3")
-    # try:
-    #     os.path.exists(r"E:\Программы\Проекты Питон\PZ_3\first.txt")
-    # except False:
-    #     print("21212")
 
     # =============================== создание файла ================================ #
 
@@ -60,12 +56,21 @@ def z2():
 
     def create_file():
         file_name = file_name_var.get() + ".txt"
-        if file_name:
+        if not file_name_var.get():  # проверка на пустую строку
+            messagebox.showwarning("Ошибка", "Введите название файла.")
+            return
+        try:
+            if os.path.exists(file_name):
+                raise FileExistsError() #raise для принудительного вызова ошибки
+
             with open(file_name, 'w') as f:
                 f.write("")
             messagebox.showinfo("Успех", f"Файл '{file_name}' создан.")
-        else:
-            messagebox.showwarning("Ошибка", "Введите название файла.")
+
+        except FileExistsError:
+            messagebox.showerror("Ошибка", "Файл уже создан.")
+        except OSError:  # на случай запрещённых символов в названии \ / * ? " < > |
+            messagebox.showerror("Ошибка", "Произошла ошибка при создании файла.")
 
     ttk.Label(create_frame, text="Название файла:").pack(side=tk.LEFT, ipadx=1)
     ttk.Entry(create_frame, textvariable=file_name_var).pack(side=tk.LEFT)
@@ -79,20 +84,22 @@ def z2():
     def display_content():
         file_name = file_name_var.get() + ".txt"
 
-        if os.path.exists(file_name):
+        try:
+            if not os.path.exists(file_name):
+                raise FileNotFoundError()
+
             with open(file_name, 'r', encoding="utf-8") as f:
                 content = f.read()
-            content_area.config(state=tk.NORMAL)  # разрешаем редактирование временно
-            content_area.delete('1.0', tk.END)  # очищаем область
-            content_area.insert(tk.INSERT, content)  # вставляем текст
-            content_area.config(state=tk.DISABLED)  # запрещаем редактирование
-        else:
-            messagebox.showwarning("Ошибка", "Файл не существует.")
+            content_area.config(state=tk.NORMAL)  # разрешение на временный редакт поля
+            content_area.delete('1.0', tk.END)  # чистка старых данных
+            content_area.insert(tk.INSERT, content)  # вставка нового текста
+            content_area.config(state=tk.DISABLED)  # закрываем редакт поля
+        except FileNotFoundError:
+            messagebox.showerror("Ошибка", "Файла не существует.")
 
     tk.Label(content_frame, text="Содержимое документа:").pack(pady=3)
 
-    content_area = scrolledtext.ScrolledText(content_frame, width=30, height=10, state=tk.DISABLED)  # состояние
-    # изначально отключено
+    content_area = scrolledtext.ScrolledText(content_frame, width=30, height=10)
     content_area.pack()
 
     tk.Button(content_frame, text="Отобразить содержимое файла", command=display_content).pack(pady=5)
@@ -104,18 +111,27 @@ def z2():
 
     def add_line():
         file_name = file_name_var.get() + ".txt"
-        line_to_add = text_area.get("1.0", tk.END).strip()  # получаем весь текст из text_area
-        if os.path.exists(file_name) and line_to_add:
+        line_to_add = text_area.get("1.0", tk.END).strip()  # получение всего текста из text_area
+
+        try:
+            if not os.path.exists(file_name):
+                raise FileNotFoundError()
+
+            if not line_to_add:  # проверка на пустую строку
+                messagebox.showwarning("Ошибка", "Пустая строка. Пожалуйста, введите данные.")
+                return
+
             with open(file_name, 'a', encoding="utf-8") as f:
                 f.write("\n" + line_to_add)
             messagebox.showinfo("Успех", "Строка добавлена в файл.")
-            text_area.delete("1.0", tk.END)  # Очищаем text_area
-        else:
-            messagebox.showwarning("Ошибка", "Файл не существует или строка пуста.")
+            text_area.delete("1.0", tk.END)  # чистка text_area для нового ввода
+
+        except FileNotFoundError:
+            messagebox.showerror("Ошибка", "Файла не существует.")
 
     tk.Label(add_line_frame, text="Строка для добавления:").pack(pady=3)
 
-    # Создаем многострочное текстовое поле
+    # многострочное текстовое поле
     text_area = scrolledtext.ScrolledText(add_line_frame, wrap=tk.WORD, width=30, height=5)
     text_area.pack()
 
@@ -128,11 +144,15 @@ def z2():
 
     def delete_file():
         file_name = file_name_var.get() + ".txt"
-        if os.path.exists(file_name):
+
+        try:
+            if not os.path.exists(file_name):
+                raise FileNotFoundError()
             os.remove(file_name)
             messagebox.showinfo("Успех", f"Файл '{file_name}' удален.")
-        else:
-            messagebox.showwarning("Ошибка", "Файл не существует.")
+
+        except FileNotFoundError:
+            messagebox.showerror("Ошибка", "Файла не существует.")
 
     tk.Label(delete_frame, text="Для удаления файла нажмите на кнопку -> ").pack(pady=5, side=tk.LEFT)
     tk.Button(delete_frame, text="Удалить файл", command=delete_file).pack(pady=10, side=tk.LEFT)
@@ -149,7 +169,6 @@ def on_combobox_change(event):
     elif selected_task == "Задание №2":
         frame.pack_forget()
         z2()
-
 
 combobox.bind("<<ComboboxSelected>>", on_combobox_change)
 on_combobox_change(None)
