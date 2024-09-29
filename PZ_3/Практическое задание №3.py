@@ -12,7 +12,7 @@ web.geometry("500x600+530+100")
 
 ttk.Label(text="Выбранная задача: ").pack(anchor=NW, padx=4, pady=1)
 
-tasks = [" - выберите задачу - ", "Задание №1", "Задание №2"]
+tasks = [" - выберите задачу - ", "Задание №1", "Задание №2", "Задание №3"]
 tasks_var = StringVar(value=tasks[0])
 
 combobox = ttk.Combobox(textvariable=tasks_var, values=tasks, state="readonly")
@@ -170,12 +170,94 @@ def z2():
     tk.Label(delete_frame, text="Для удаления файла нажмите на кнопку -> ").pack(pady=5, side=tk.LEFT)
     tk.Button(delete_frame, text="Удалить файл", command=delete_file).pack(pady=10, side=tk.LEFT)
 
+
+
+
+
+
+
+
+
+
+def z3():
+    clear_task_frame()
+
+    os.chdir(r"C:\Users\Юлия\Downloads\PZ_Python\PZ_3")
+
+    # =============================== создание файла ================================ #
+
+    file_name_var_z3 = tk.StringVar()
+
+    create_frame_z3 = ttk.Frame(task_frame)
+    create_frame_z3.pack(pady=10)
+
+    def create_file_z3():
+        file_name_z3 = file_name_var_z3.get() + ".json"
+        if not file_name_var_z3.get():  # проверка на пустую строку
+            messagebox.showwarning("Ошибка", "Введите название файла.")
+            return
+        try:
+            if os.path.exists(file_name_z3):
+                raise FileExistsError()  # raise для принудительного вызова ошибки
+
+            with open(file_name_z3, 'w') as f:
+                f.write("")
+            messagebox.showinfo("Успех", f"Файл '{file_name_z3}' создан.")
+
+        except FileExistsError:
+            messagebox.showerror("Ошибка", "Файл уже создан.")
+        except OSError:  # на случай запрещённых символов в названии \ / * ? " < > |
+            messagebox.showerror("Ошибка", "Произошла ошибка при создании файла.")
+
+    ttk.Label(create_frame_z3, text="Название файла:").pack(side=tk.LEFT, ipadx=1)
+    ttk.Entry(create_frame_z3, textvariable=file_name_var_z3).pack(side=tk.LEFT)
+    ttk.Button(create_frame_z3, text="Создать файл", command=create_file_z3).pack(padx=5, side=tk.LEFT)
+
+
+
+
+
+
+
+
+
+
+
+
+    delete_frame_z3 = tk.Frame(task_frame)
+    delete_frame_z3.pack(pady=10)
+
+    def delete_file_z3():
+        file_name_z3 = file_name_var_z3.get() + ".json"
+
+        try:
+            if not os.path.exists(file_name_z3):
+                raise FileNotFoundError()
+            os.remove(file_name_z3)
+            messagebox.showinfo("Успех", f"Файл '{file_name_z3}' удален.")
+
+        except FileNotFoundError:
+            messagebox.showerror("Ошибка", "Файла не существует.")
+
+    tk.Label(delete_frame_z3, text="Для удаления файла нажмите на кнопку -> ").pack(pady=5, side=tk.LEFT)
+    tk.Button(delete_frame_z3, text="Удалить файл", command=delete_file_z3).pack(pady=10, side=tk.LEFT)
+
+
+
+
+
+
+
+
+
 def on_combobox_change(event):
     selected_task = tasks_var.get()
     if selected_task == "Задание №1":
         z1()
     elif selected_task == "Задание №2":
         z2()
+    elif selected_task == "Задание №3":
+        z3()
     else:
         clear_task_frame()  # чистка фреймов, если выбрано " - выберите задачу - "
 
