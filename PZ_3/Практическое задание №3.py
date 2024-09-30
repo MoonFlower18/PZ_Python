@@ -6,6 +6,9 @@ import tkinter as tk
 
 import psutil
 import os
+import xml
+import xml.etree.ElementTree as ET
+from xml.dom import minidom
 
 web = Tk()
 web.title("Практические задачи")
@@ -13,7 +16,7 @@ web.geometry("500x600+530+100")
 
 ttk.Label(text="Выбранная задача: ").pack(anchor=NW, padx=4, pady=1)
 
-tasks = [" - выберите задачу - ", "Задание №1", "Задание №2", "Задание №3"]
+tasks = [" - выберите задачу - ", "Задание №1", "Задание №2", "Задание №3", "Задание №4"]
 tasks_var = StringVar(value=tasks[0])
 
 combobox = ttk.Combobox(textvariable=tasks_var, values=tasks, state="readonly")
@@ -57,7 +60,6 @@ def z1():
         output += "+-------------------------------------+"
 
     label_z1.config(text=output)
-
 
 def z2():
     clear_task_frame()
@@ -174,20 +176,6 @@ def z2():
     tk.Label(delete_frame, text="Для удаления файла нажмите на кнопку -> ").pack(pady=5, side=tk.LEFT)
     tk.Button(delete_frame, text="Удалить файл", command=delete_file).pack(pady=10, side=tk.LEFT)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def z3():
     clear_task_frame()
 
@@ -266,32 +254,31 @@ def z3():
 
             with open(file_name_z3, 'r', encoding='utf-8') as j:
                 if os.path.getsize(file_name_z3) == 0:  # проверка на пустой файл
-                    ex_data = []  # создадим новый список, чтобы не было ошибки json.JSONDecodeError
+                    ex_data = []  # новый список, чтобы не было ошибки json.JSONDecodeError
                 else:
                     ex_data = json.load(j)
 
                 if isinstance(ex_data, dict):
-                    # Конвертация словаря в список
+                    # конвертация словаря в список, словари не плюсуются
                     ex_data = list(ex_data.values())
                 elif not isinstance(ex_data, list):
                     raise ValueError("Данные в файле должны быть либо списком, либо объектом.")
 
-            if fam.get().isalpha() and name.get().isalpha() and (och.get().isalpha() or och.get() == ""):
-                fio = {
-                    "Фамилия": fam.get(),
-                    "Имя": name.get(),
-                    "Отчество": och.get()
-                }
-            else:
+            try:
+                if fam.get().isalpha() and name.get().isalpha() and (och.get().isalpha() or och.get() == ""):
+                    fio = {
+                        "Фамилия": fam.get(),
+                        "Имя": name.get(),
+                        "Отчество": och.get()
+                    }
+                ex_data.append(fio)
+
+                with open(file_name_z3, 'w', encoding='utf-8') as j:
+                    json.dump(ex_data, j, ensure_ascii=False, indent=4)
+
+                messagebox.showinfo("Успех", "Данные успешно записаны в файл.")
+            except UnboundLocalError:
                 messagebox.showerror("Ошибка", "ФИО должно состоять из букв.")
-
-
-            ex_data.append(fio)
-
-            with open(file_name_z3, 'w', encoding='utf-8') as j:
-                json.dump(ex_data, j, ensure_ascii=False, indent=4)
-
-            messagebox.showinfo("Успех", "Данные успешно записаны в файл.")
 
         except FileNotFoundError:
             messagebox.showerror("Ошибка", "Файла не существует.")
@@ -325,7 +312,6 @@ def z3():
 
     tk.Button(add_lines_frame, text="Добавить в файл", command=add_lines_z3).pack(pady=5)
 
-
     # ============================ удаление текста ============================ #
 
     delete_frame_z3 = tk.Frame(task_frame)
@@ -346,6 +332,161 @@ def z3():
     tk.Label(delete_frame_z3, text="Для удаления файла нажмите на кнопку -> ").pack(pady=5, side=tk.LEFT)
     tk.Button(delete_frame_z3, text="Удалить файл", command=delete_file_z3).pack(pady=10, side=tk.LEFT)
 
+def z4():
+    clear_task_frame()
+
+    os.chdir(r"C:\Users\Юлия\Downloads\PZ_Python\PZ_3")
+
+    # =============================== создание файла ================================ #
+
+    file_name_var_z4 = tk.StringVar()
+
+    create_frame_z4 = ttk.Frame(task_frame)
+    create_frame_z4.pack(pady=10)
+
+    def create_file_z4():
+        file_name_z4 = file_name_var_z4.get() + ".xml"
+        if not file_name_var_z4.get():  # проверка на пустую строку
+            messagebox.showwarning("Ошибка", "Введите название файла.")
+            return
+        try:
+            if os.path.exists(file_name_z4):
+                raise FileExistsError()  # raise для принудительного вызова ошибки
+
+            with open(file_name_z4, 'w') as f:
+                f.write("")
+            messagebox.showinfo("Успех", f"Файл '{file_name_z4}' создан.")
+
+        except FileExistsError:
+            messagebox.showerror("Ошибка", "Файл уже создан.")
+        except OSError:  # на случай запрещённых символов в названии \ / * ? " < > |
+            messagebox.showerror("Ошибка", "Произошла ошибка при создании файла.")
+
+    ttk.Label(create_frame_z4, text="Название файла:").pack(side=tk.LEFT, ipadx=1)
+    ttk.Entry(create_frame_z4, textvariable=file_name_var_z4).pack(side=tk.LEFT)
+    ttk.Button(create_frame_z4, text="Создать файл", command=create_file_z4).pack(padx=5, side=tk.LEFT)
+
+    # ============================ отображение содержимого ============================ #
+
+    content_frame_z4 = ttk.Frame(task_frame)
+    content_frame_z4.pack(pady=10)
+
+    def display_content_z4():
+        file_name_z4 = file_name_var_z4.get() + ".xml"
+
+        try:
+            if not os.path.exists(file_name_z4):
+                raise FileNotFoundError()
+
+            with open(file_name_z4, encoding='utf-8') as x:
+                content_z4 = ET.parse(x)
+                root = content_z4.getroot()
+                content_z4 = ''.join(ET.tostring(elem, encoding='unicode') for elem in root)
+
+
+            content_area_z4.config(state=tk.NORMAL)  # разрешение на временный редакт поля
+            content_area_z4.delete('1.0', tk.END)  # чистка старых данных
+            content_area_z4.insert(tk.INSERT, content_z4) # вставка нового текста
+            content_area_z4.config(state=tk.DISABLED)  # закрываем редакт поля
+        except FileNotFoundError:
+            messagebox.showerror("Ошибка", "Файла не существует.")
+        except xml.etree.ElementTree.ParseError:
+            messagebox.showerror("Ошибка", "Файл пуст.")
+
+    tk.Label(content_frame_z4, text="Содержимое документа:").pack(pady=3)
+
+    content_area_z4 = scrolledtext.ScrolledText(content_frame_z4, width=30, height=10)
+    content_area_z4.pack()
+
+    tk.Button(content_frame_z4, text="Отобразить содержимое файла", command=display_content_z4).pack(pady=5)
+
+    # ============================ добавление текста ============================ #
+
+    add_lines_frame_z4 = tk.Frame(task_frame)
+    add_lines_frame_z4.pack(pady=10)
+
+    def add_lines_z4():
+        file_name_z4 = file_name_var_z4.get() + ".xml"
+
+        try:
+            if not os.path.exists(file_name_z4):
+                raise FileNotFoundError()
+
+            try:
+                if city.get().isalpha() and street.get().isalpha() and house.get().isdigit():
+                    addr_info = ET.Element('info')
+                    addr_address = ET.SubElement(addr_info, 'address')
+
+                    addr_city = ET.SubElement(addr_address, 'city')
+                    addr_city.text = city.get()
+
+                    addr_street = ET.SubElement(addr_address, 'street')
+                    addr_street.text = street.get()
+
+                    addr_house = ET.SubElement(addr_address, 'house')
+                    addr_house.text = house.get()
+
+                    # записываем данные в файл
+                    ET.ElementTree(addr_info).write(file_name_z4, encoding='utf-8', xml_declaration=True)
+                    messagebox.showinfo("Успех", "Данные успешно записаны в файл.")
+
+            except UnboundLocalError:
+                messagebox.showerror("Ошибка", "Город и улицу нужно указать только буквами, номер дома - цифрой.")
+
+        except FileNotFoundError:
+            messagebox.showerror("Ошибка", "Файла не существует.")
+        except TypeError:
+            messagebox.showerror("Ошибка", "Некорректный ввод данных.")
+
+    tk.Label(add_lines_frame_z4, text="Введите адрес абитуриента: ").pack(pady=3)
+
+    city_frame = tk.Frame(add_lines_frame_z4)
+    city_frame.pack(pady=1)
+
+    street_frame = tk.Frame(add_lines_frame_z4)
+    street_frame.pack(pady=1)
+
+    house_frame = tk.Frame(add_lines_frame_z4)
+    house_frame.pack(pady=1)
+
+    tk.Label(city_frame, text="Город: ").pack(pady=3, side=tk.LEFT)
+    city = ttk.Entry(city_frame)
+    city.pack(anchor=NW, padx=6, pady=6, side=tk.LEFT)
+
+    tk.Label(street_frame, text="Улица: ").pack(pady=3, side=tk.LEFT)
+    street = ttk.Entry(street_frame)
+    street.pack(anchor=NW, padx=6, pady=6, side=tk.LEFT)
+
+    tk.Label(house_frame, text="Дом: ").pack(pady=3, side=tk.LEFT)
+    house = ttk.Entry(house_frame)
+    house.pack(anchor=NW, padx=6, pady=6, side=tk.LEFT)
+
+    tk.Button(add_lines_frame_z4, text="Добавить в файл", command=add_lines_z4).pack(pady=5)
+
+    # ============================ удаление текста ============================ #
+
+    delete_frame_z4 = tk.Frame(task_frame)
+    delete_frame_z4.pack(pady=10)
+
+    def delete_file_z4():
+        file_name_z4 = file_name_var_z4.get() + ".xml"
+
+        try:
+            if not os.path.exists(file_name_z4):
+                raise FileNotFoundError()
+            os.remove(file_name_z4)
+            messagebox.showinfo("Успех", f"Файл '{file_name_z4}' удален.")
+
+        except FileNotFoundError:
+            messagebox.showerror("Ошибка", "Файла не существует.")
+
+    tk.Label(delete_frame_z4, text="Для удаления файла нажмите на кнопку -> ").pack(pady=5, side=tk.LEFT)
+    tk.Button(delete_frame_z4, text="Удалить файл", command=delete_file_z4).pack(pady=10, side=tk.LEFT)
+
+
+
+
+
 
 def on_combobox_change(event):
     selected_task = tasks_var.get()
@@ -355,6 +496,8 @@ def on_combobox_change(event):
         z2()
     elif selected_task == "Задание №3":
         z3()
+    elif selected_task == "Задание №4":
+        z4()
     else:
         clear_task_frame()  # чистка фреймов, если выбрано " - выберите задачу - "
 
