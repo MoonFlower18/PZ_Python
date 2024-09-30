@@ -101,7 +101,7 @@ def z5():
     web.title("Проверка почты")
     x = web.winfo_screenwidth()  # размер по горизонтали из размера экрана
     y = web.winfo_screenheight()  # размер по вертикали из размера экрана
-    web.geometry('{}x{}+630+250'.format(int(x * 0.2), int(y * 0.4)))  # ширина х высота (умножить на процент) +
+    web.geometry('{}x{}+630+250'.format(int(x * 0.3), int(y * 0.4)))  # ширина х высота (умножить на процент) +
     # отступ слева + отступ сверху
     web.configure(background="#F5F5F5", cursor="diamond_cross")
 
