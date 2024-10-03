@@ -8,7 +8,7 @@ import psutil
 import os
 import xml
 import xml.etree.ElementTree as ET
-from xml.dom import minidom
+import zipfile
 
 web = Tk()
 web.title("Практические задачи")
@@ -16,7 +16,7 @@ web.geometry("500x600+530+100")
 
 ttk.Label(text="Выбранная задача: ").pack(anchor=NW, padx=4, pady=1)
 
-tasks = [" - выберите задачу - ", "Задание №1", "Задание №2", "Задание №3", "Задание №4"]
+tasks = [" - выберите задачу - ", "Задание №1", "Задание №2", "Задание №3", "Задание №4", "Задание №5"]
 tasks_var = StringVar(value=tasks[0])
 
 combobox = ttk.Combobox(textvariable=tasks_var, values=tasks, state="readonly")
@@ -25,8 +25,6 @@ combobox.pack(anchor=NW, padx=6, pady=6)
 # фрейм для задач
 task_frame = Frame(web)
 task_frame.pack(anchor=NW, fill=BOTH)
-
-
 def clear_task_frame():
     # удаление всех деталей из фрейма с задачами
     for widget in task_frame.winfo_children():
@@ -463,7 +461,7 @@ def z4():
 
     tk.Button(add_lines_frame_z4, text="Добавить в файл", command=add_lines_z4).pack(pady=5)
 
-    # ============================ удаление текста ============================ #
+    # ============================ удаление файла ============================ #
 
     delete_frame_z4 = tk.Frame(task_frame)
     delete_frame_z4.pack(pady=10)
@@ -483,6 +481,115 @@ def z4():
     tk.Label(delete_frame_z4, text="Для удаления файла нажмите на кнопку -> ").pack(pady=5, side=tk.LEFT)
     tk.Button(delete_frame_z4, text="Удалить файл", command=delete_file_z4).pack(pady=10, side=tk.LEFT)
 
+def z5():
+    clear_task_frame()
+
+    os.chdir(r"C:\Users\Юлия\Downloads\PZ_Python\PZ_3")
+
+# =============================== создание файла ================================ #
+
+    file_name_var_z5 = tk.StringVar()
+
+    create_frame_z5 = ttk.Frame(task_frame)
+    create_frame_z5.pack(pady=10)
+    def create_file_z5():
+        file_name_z5 = file_name_var_z5.get() + ".zip"
+        if not file_name_var_z5.get():  # проверка на пустую строку
+            messagebox.showwarning("Ошибка", "Введите название архива.")
+            return
+        try:
+            if os.path.exists(file_name_z5):
+                raise FileExistsError()  # raise для принудительного вызова ошибки
+
+                # создание пустого архива
+            with zipfile.ZipFile(file_name_z5, 'w') as zipf:
+                pass
+            messagebox.showinfo("Успех", f"Архив '{file_name_z5}' создан.")
+
+        except FileExistsError:
+            messagebox.showerror("Ошибка", "Архив уже создан.")
+        except OSError:  # на случай запрещённых символов в названии \ / * ? " < > |
+            messagebox.showerror("Ошибка", "Произошла ошибка при создании архива.")
+
+    ttk.Label(create_frame_z5, text="Название архива:").pack(side=tk.LEFT, ipadx=1)
+    ttk.Entry(create_frame_z5, textvariable=file_name_var_z5).pack(side=tk.LEFT)
+    ttk.Button(create_frame_z5, text="Создать архив", command=create_file_z5).pack(padx=5, side=tk.LEFT)
+
+    # ============================ добавление файла ============================ #
+
+    add_file_frame_z5 = tk.Frame(task_frame)
+    add_file_frame_z5.pack(pady=10)
+
+    file_path = tk.StringVar()  # тут путь к файлу
+
+    def add_file_z5():
+        file_name_z5 = file_name_var_z5.get() + ".zip"
+        file_to_add = file_path.get()
+
+        try:
+            if not os.path.exists(file_name_z5) or not os.path.exists(file_to_add):  # проверка существования архива или файла
+                raise FileNotFoundError()
+
+            with zipfile.ZipFile(file_name_z5, 'a') as zipf:
+                # проверка, существует ли файл в архиве
+                existing_files = zipf.namelist()
+                if os.path.basename(file_to_add) in existing_files:
+                    messagebox.showwarning("Ошибка", f'Файл {os.path.basename(file_to_add)} уже был добавлен в архив {file_name_z5}')
+                    return
+
+                # добавка файла в архив
+                zipf.write(file_to_add, os.path.basename(file_to_add))
+                messagebox.showinfo("Успех", f'Файл {os.path.basename(file_to_add)} добавлен в архив {file_name_z5}')
+
+
+        except FileNotFoundError:
+            messagebox.showerror("Ошибка", "Добавлямого файла или архива не существует.")
+        except TypeError:
+            messagebox.showerror("Ошибка", "Некорректный ввод данных.")
+
+    ttk.Label(add_file_frame_z5, text="Укажите путь к файлу:").pack(side=tk.LEFT, ipadx=1)
+    ttk.Entry(add_file_frame_z5, textvariable=file_path).pack(side=tk.LEFT)
+    ttk.Button(add_file_frame_z5, text="Добавить файл", command=add_file_z5).pack(padx=5, side=tk.LEFT)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # ============================ удаление файла ============================ #
+
+    delete_frame_z5 = tk.Frame(task_frame)
+    delete_frame_z5.pack(pady=10)
+
+    def delete_arh_z5():
+        file_name_z5 = file_name_var_z5.get() + ".zip"
+
+        try:
+            if not os.path.exists(file_name_z5):
+                raise FileNotFoundError()
+            os.remove(file_name_z5)
+            messagebox.showinfo("Успех", f"Архив '{file_name_z5}' удален.")
+
+        except FileNotFoundError:
+            messagebox.showerror("Ошибка", "Архива не существует.")
+
+    tk.Label(delete_frame_z5, text="Для удаления архива нажмите на кнопку -> ").pack(pady=5, side=tk.LEFT)
+    tk.Button(delete_frame_z5, text="Удалить архив", command=delete_arh_z5).pack(pady=10, side=tk.LEFT)
+
+
+
+
+
 
 
 
@@ -498,6 +605,8 @@ def on_combobox_change(event):
         z3()
     elif selected_task == "Задание №4":
         z4()
+    elif selected_task == "Задание №5":
+        z5()
     else:
         clear_task_frame()  # чистка фреймов, если выбрано " - выберите задачу - "
 
