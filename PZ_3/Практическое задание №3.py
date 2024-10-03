@@ -566,10 +566,10 @@ def z5():
 
 
 
-    # ============================ удаление файла ============================ #
+    # ============================ удаление архива и файла ============================ #
 
     delete_frame_z5 = tk.Frame(task_frame)
-    delete_frame_z5.pack(pady=10)
+    delete_frame_z5.pack()
 
     def delete_arh_z5():
         file_name_z5 = file_name_var_z5.get() + ".zip"
@@ -586,14 +586,32 @@ def z5():
     tk.Label(delete_frame_z5, text="Для удаления архива нажмите на кнопку -> ").pack(pady=5, side=tk.LEFT)
     tk.Button(delete_frame_z5, text="Удалить архив", command=delete_arh_z5).pack(pady=10, side=tk.LEFT)
 
+    delete_frame_z5_2 = tk.Frame(task_frame)
+    delete_frame_z5_2.pack()
+    def delete_file_z5():
+        file_name_z5 = file_name_var_z5.get() + ".zip"
+        file_to_add = file_path.get()
 
+        try:
+            if not os.path.exists(file_name_z5):
+                raise FileNotFoundError(f"Архив '{file_name_z5}' не найден.")
 
+            with zipfile.ZipFile(file_name_z5, 'r') as zipf:
+                existing_files = zipf.namelist()
+                if os.path.basename(file_to_add) in existing_files:
 
+                    with zipfile.ZipFile(file_name_z5, 'w') as temp_zipf:
+                        for item in existing_files:
+                            if item != os.path.basename(file_to_add):
+                                temp_zipf.write(zipf.read(item), item)
+                    messagebox.showinfo("Успех", f"Файл '{os.path.basename(file_to_add)}' удален из архива {file_name_z5}.")
+                else:
+                    messagebox.showwarning("Ошибка", f"Файл '{os.path.basename(file_to_add)}' не найден в архиве.")
+        except FileNotFoundError:
+            messagebox.showerror("Ошибка", "Файла или архива не существует.")
 
-
-
-
-
+    tk.Label(delete_frame_z5_2, text="Для удаления файла нажмите на кнопку -> ").pack(pady=5, side=tk.LEFT)
+    tk.Button(delete_frame_z5_2, text="Удалить файл из архива", command=delete_file_z5).pack(pady=10, side=tk.LEFT)
 
 def on_combobox_change(event):
     selected_task = tasks_var.get()
