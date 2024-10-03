@@ -485,6 +485,7 @@ def z5():
     clear_task_frame()
 
     os.chdir(r"C:\Users\Юлия\Downloads\PZ_Python\PZ_3")
+    #C:/Users/Yuliya/Downloads/test.txt
 
 # =============================== создание файла ================================ #
 
@@ -551,20 +552,38 @@ def z5():
     ttk.Entry(add_file_frame_z5, textvariable=file_path).pack(side=tk.LEFT)
     ttk.Button(add_file_frame_z5, text="Добавить файл", command=add_file_z5).pack(padx=5, side=tk.LEFT)
 
+    # ============================ разархивирование файлов архива ============================ #
 
+    ex_frame = tk.Frame(task_frame)
+    ex_frame.pack()
+    def extract_zip():
+        file_name_z5 = file_name_var_z5.get() + ".zip"  # Имя ZIP-архива
+        extract_folder = os.path.splitext(file_name_z5)[0]  # Создаём имя папки для извлечения
 
+        try:
+            # Проверяем существование архива
+            if not os.path.exists(file_name_z5):
+                raise FileNotFoundError(f"Архив '{file_name_z5}' не найден.")
 
+            # Создаем папку для извлечения, если она не существует
+            if not os.path.exists(extract_folder):
+                os.makedirs(extract_folder)
 
+            with zipfile.ZipFile(file_name_z5, 'r') as zipf:
+                zipf.extractall(extract_folder)  # Извлечение всех файлов в папку
+                extracted_files = zipf.namelist()  # Получаем список извлеченных файлов
 
+            # Выводим информацию о содержимом
+            msg = "Извлеченные файлы:\n" + "\n".join(extracted_files)
+            messagebox.showinfo("Успех", msg)
 
+        except FileNotFoundError as e:
+            messagebox.showerror("Ошибка", str(e))
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Не удалось разархивировать: {str(e)}")
 
-
-
-
-
-
-
-
+    # Пример кнопки для вызова функции
+    tk.Button(ex_frame, text="Разархивировать файл", command=extract_zip).pack(pady=10, side=tk.LEFT)
 
     # ============================ удаление архива и файла ============================ #
 
@@ -627,7 +646,6 @@ def on_combobox_change(event):
         z5()
     else:
         clear_task_frame()  # чистка фреймов, если выбрано " - выберите задачу - "
-
 
 combobox.bind("<<ComboboxSelected>>", on_combobox_change)
 on_combobox_change(None)
